@@ -11,20 +11,24 @@ import { useForm } from "react-hook-form"
 import { loginUser } from "@/store/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 
 const LoginDialog = ({ trigger,open,onOpenChange,openForgotPassword ,openRegister}) => {
   const [showPassword, setShowPassword] = useState(false);
    const{register,handleSubmit}=useForm()
-    const [formData,setFormData]=useState({})
+    const navigate=useNavigate()
     const dispatch=useDispatch()
+   
     
   
     const onSubmitForm = (data) => {
-  
       dispatch(loginUser(data)).then((data)=>
     {
-      if(data)toast(data.payload.message)
+      if(data){
+        toast(data.payload.message)
+      if(data.payload?.user?.role==='ADMIN') navigate('/admin')
+      }
         else toast('something went wrong')
     }
     )
@@ -102,12 +106,14 @@ const LoginDialog = ({ trigger,open,onOpenChange,openForgotPassword ,openRegiste
               {/* <ForgotPasswordDialog
               
               /> */}
-              <Button variant="link" onClick={openForgotPassword}   className="p-0 text-sm font-medium">
+              <p   onClick={openForgotPassword}   className="p-0 text-sm font-medium cursor-pointer  hover:text-orange-600">
                               Forgot Password
-                            </Button>
+                            </p>
             </div>
 
-            <Button className="w-full bg-[#E16F3D] hover:bg-orange-600 h-12 mt-2">
+            <Button
+             onClick={()=>navigate('')}
+             className="w-full bg-[#E16F3D] hover:bg-orange-600 h-12 mt-2">
               Login
             </Button>
 

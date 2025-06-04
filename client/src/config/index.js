@@ -1,38 +1,85 @@
 export const brand = [
-  { label: "Samsung" },
-  { label: "Apple" },
-  { label: "Xiaomi" },
-  { label: "Realme" },
-  { label: "OnePlus" },
-  { label: "Oppo" },
-  { label: "Vivo" },
-  { label: "Huawei" },
-  { label: "Infinix" },
-  { label: "Tecno" },
-  { label: "Motorola" },
-  { label: "Nokia" },
-  { label: "Sony" },
-  { label: "Asus" },
-  { label: "Google" },
-  { label: "Honor" },
-  { label: "ZTE" },
-  { label: "Lenovo" },
-  { label: "Itel" },
-  { label: "HTC" }
+  { label: "Samsung",logo:"src/assets/huawei-seeklogo.svg" },
+  { label: "Apple",logo:"src/assets/iphone-seeklogo.png" },
+  { label: "Xiaomi",logo:"src/assets/xiaomi-seeklogo.png" },
+  { label: "Realme",logo:"src/assets/huawei-seeklogo.svg" },
+  { label: "OnePlus",logo:"src/assets/oneplus-seeklogo.png" },
+  { label: "Oppo",logo:"src/assets/oppo-seeklogo.svg" },
+  { label: "Vivo",logo:"src/assets/vivo-seeklogo.png" },
+  { label: "Huawei",logo:"src/assets/huawei-seeklogo.svg" },
+  { label: "Infinix",logo:"src/assets/infinix-seeklogo.svg" },
+  { label: "Itel",logo:"src/assets/itel-seeklogo.png" },
+  { label: "Realme",logo:"src/assets/realme-seeklogo.png" },
+
+  
+
+  // infinix-seeklogo.svg
+  // { label: "Infinix" },
+  // { label: "Tecno" },
+  // infinix-seeklogo.svg
+  // 
+  // lg-mobile-seeklogo.png
+  
+  // 
+  { label: "Motorola" ,logo:"src/assets/motorola-seeklogo.png"},
+  { label: "Nokia",logo:"src/assets/huawei-seeklogo.svg" },
+  { label: "Sony",logo:"src/assets/huawei-seeklogo.svg" },
+  // { label: "Asus" },
+  // { label: "Google" },
+  // { label: "Honor" },
+  // { label: "ZTE" },
+  // { label: "Lenovo" },
+  // { label: "Itel" },
+  // { label: "HTC" }
 ];
 
 
 
   export const category = [
-    {  label: "Mobile Phones" },
-    {  label: "Cases and Covers" },
-    {  label: "Screen Protectors" },
-    { label: "Chargers and Cables" },
-    {  label: "Power Banks" },
-    {  label: "Earphones / Headphones / TWS" },
-    {  label: "Smartwatches" },
-    {  label: "Mobile Gaming Accessories" }
+    { id: "mobilePhones",  label: "Mobile Phones" },
+    // { id: "casesnCovers", label: "Cases and Covers" },
+    // {  label: "Screen Protectors" },
+    {id: "cables", label: "Chargers and Cables" },
+    { id: "powerBank", label: "Power Banks" },
+    // { id: "earphones",  label: "Earphones / Headphones / TWS" },
+    { id: "tws",  label: "TWS" },
+    { id: "smartwatches", label: "Smartwatches" },
+    // {  label: "Mobile Gaming Accessories" }
   ];
+
+
+  // export const color = [
+  //    { id: "black", label: "Black" },
+  //   { id: "white",  label: "White" },
+  //   { id: "red",  label: "Red" },
+  //   { id: "green", label: "Green" },
+  //   {id: "blue", label: "Blue" },
+  //   { id: "gray", label: "Gray" },
+  // ];
+
+
+  export const color = [
+  { id: "black", label: "Black", color: "bg-black" },
+  { id: "white", label: "White", color: "bg-white border" },
+  { id: "red", label: "Red", color: "bg-red-500" },
+  { id: "green", label: "Green", color: "bg-green-500" },
+  { id: "blue", label: "Blue", color: "bg-blue-500" },
+  { id: "gray", label: "Gray", color: "bg-gray-400" },
+];
+
+ export  const tabsTittle = [
+    { id: "all", title: "All" },
+    { id: "mobilePhones", title: "Mobile Phones" },
+    { id: "casesnCovers", title: "Cases and Covers"},
+    { id: "powerBank", title: "Power Bank" },
+
+    { id: "earphones", title: "Earphones" },
+    { id: "smartwatches", title: "Smartwatches" },
+    { id: "cables", title: "Cables" },
+
+
+  ];
+
   
 
   export const specs= [
@@ -302,3 +349,66 @@ export const brand = [
 
 
   ]
+
+
+
+  export const sortOptions = [
+    { id: "price-lowtohigh", label: "Price: Low to High" },
+    { id: "price-hightolow", label: "Price: High to Low" },
+    { id: "title-atoz", label: "Title: A to Z" },
+    { id: "title-ztoa", label: "Title: Z to A" },
+  ];
+  
+
+  export const testimonials = [
+    {
+      id: 1,
+      name: "Alex Chen",
+      text: "Best mobile shopping experience! Got my iPhone 15 Pro with amazing customer service and fast delivery.",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+      location: "San Francisco, CA",
+      verified: true,
+      device: "iPhone 15 Pro"
+    },
+    {
+      id: 2,
+      name: "Sarah Kim",
+      text: "The AirPods Pro quality is incredible! Perfect for my daily commute and workout sessions.",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop",
+      location: "New York, NY",
+      verified: true,
+      device: "AirPods Pro"
+    },
+    {
+      id: 3,
+      name: "Mike Rodriguez",
+      text: "Samsung Galaxy S24 Ultra camera is mind-blowing! Professional photography made easy.",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+      location: "Miami, FL",
+      verified: true,
+      device: "Galaxy S24 Ultra"
+    },
+    {
+      id: 4,
+      name: "Emma Thompson",
+      text: "Apple Watch Series 9 health features are life-changing. Highly recommend for fitness enthusiasts!",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+      location: "Los Angeles, CA",
+      verified: true,
+      device: "Apple Watch Series 9"
+    },
+    {
+      id: 5,
+      name: "James Wilson",
+      text: "OnePlus 12 performance is outstanding! Gaming and multitasking are incredibly smooth.",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+      location: "Austin, TX",
+      verified: true,
+      device: "OnePlus 12"
+    }
+  ];

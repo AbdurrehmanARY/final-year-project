@@ -8,7 +8,7 @@ function ShopLayout() {
     <div className= ' flex flex-col bg-white overflow-hidden'>
   <Navbar/>
 
-<main className=' flex flex-col w-full px-12 bg-white overflow-hidden'>
+<main className=' flex flex-col w-full my-5 px-12 bg-white overflow-hidden'>
   
   <Outlet/>
 

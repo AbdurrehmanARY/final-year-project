@@ -8,9 +8,13 @@ import {
   Command,
   Frame,
   GalleryVerticalEnd,
+  Home,
   Map,
+  Package,
   PieChart,
   Settings2,
+  ShoppingBag,
+  Smartphone,
   SquareTerminal,
 } from "lucide-react"
 
@@ -27,6 +31,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { useNavigate } from "react-router-dom"
 
 // Sample data
 const data = {
@@ -55,8 +60,8 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/admin/dashboard",
-      icon: SquareTerminal,
+      url: "/admin",
+      icon: Home,
       isActive: true,
      
     },
@@ -64,14 +69,14 @@ const data = {
     {
       title: "Products",
       url: "/admin/product",
-      icon: SquareTerminal,
+      icon: Package,
       isActive: true,
      
     },
     {
         title: "Orders",
         url: "/admin/orders",
-        icon: SquareTerminal,
+        icon: ShoppingBag,
         isActive: true,
        
       },
@@ -85,9 +90,27 @@ const data = {
 }
 
 export function AppSidebar(props) {
+  const navigate=useNavigate()
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar  className="border-r border-white/20 bg-white/70 backdrop-blur-md" collapsible="icon" {...props}>
+      <SidebarHeader  className="p-6">
+              <SidebarHeader className="p-6">
+        <div className="flex items-center gap-3">
+          {/* <div onClick={()=>navigate('/')} className="flex items-center space-x-2">
+              <Smartphone className="w-6 h-6 text-orange-600" />
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 via-red-500 to-orange-700 bg-clip-text text-transparent">
+                MobileHub
+              </h1>
+            </div> */}
+          {/* <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center animate-pulse-slow">
+            <ShoppingBag className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">ShopAdmin</h2>
+            <p className="text-xs text-gray-600">Pro Dashboard</p>
+          </div> */}
+        </div>
+      </SidebarHeader>
         {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>
       <SidebarContent>

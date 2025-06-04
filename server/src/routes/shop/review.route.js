@@ -1,0 +1,10 @@
+import express from "express";
+import { addProductReview, getProductReviews } from "../../controller/shop/review.controller.js";
+// const { addProductReview, getProductReviews } = require("../../controller/shop/review.controller.js");
+
+const router = express.Router();
+
+router.post("/add-review", addProductReview);
+router.get("/:productId", getProductReviews);
+
+export default router;

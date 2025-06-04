@@ -1,10 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { AddressSection } from '../../../components/shop/AdressSection';
 import { Briefcase, Home } from 'lucide-react';
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllAddresses } from '@/store/shop/adress';
 function Account() {
-    const [selectedAddress, setSelectedAddress] = useState("1");
-    // Mock data for addresses
+    // const [selectedAddress, setSelectedAddress] = useState("");
+   
+    
 const addresses = [
     {
       id: 1,
@@ -13,14 +16,6 @@ const addresses = [
       phone: "(907) 283-6173",
       icon: Home,
       isDefault: true
-    },
-    {
-      id: 2,
-      name: "Office",
-      address: "2336 Jack Warren Rd, Delta...",
-      phone: "(907) 283-6173",
-      icon: Briefcase,
-      isDefault: false
     }
   ];
   
@@ -28,8 +23,8 @@ const addresses = [
   <>
    <AddressSection 
         addresses={addresses}
-        selectedAddress={selectedAddress}
-        setSelectedAddress={setSelectedAddress}
+        // selectedAddress={selectedAddress}
+        // setSelectedAddress={setSelectedAddress}
       />
   </>
   )

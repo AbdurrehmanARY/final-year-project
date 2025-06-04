@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, ChevronDown, ChevronRight, Ellipsis, Eye, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import TableHeader from "./TableHeader";
 import EditProduct from "./EditProduct";
 import DeleteProduct from "./DeleteProduct";
+import AddProductDialog from "./AddProductDialog";
 
 const check=(id)=>{
   console.log(id)
@@ -88,6 +90,14 @@ const columns = [
     //   },
     header: ({ column }) => (
         <TableHeader column={column} title="Category" />
+      ),
+        cell: ({ row }) => (
+        <Badge
+        variant="secondry"
+        >
+{row.original.category}
+</Badge>
+      
       ),
 
   },
@@ -168,8 +178,14 @@ variant={
   {
     accessorKey: "action",
     header: "Action",
-    cell: ({row}) => (
-     
+    cell: ({row}) => 
+      {
+const [isEdited,setIsEdited]=useState(true)
+const [open, setOpen] = useState(false)
+
+
+        return(
+          <>
     <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="h-8 w-8 p-0">
@@ -187,7 +203,19 @@ variant={
         <Eye />
         View Product
       </DropdownMenuItem>
-      <EditProduct row={row}/>
+         <DropdownMenuItem key={2}  onClick={() => {
+              // Delay to prevent aria-hidden focus conflict
+            //  getOrder(row?.original?.id)
+            setIsEdited(true)
+              setTimeout(() => setOpen(true), 10)
+             
+            }} >
+            <div className='flex gap-2'>
+              <Pencil />
+              <span>Edit product</span>
+              </div>
+      
+            </DropdownMenuItem>
       <DropdownMenuSeparator />
     
       <DeleteProduct id={row.original.id}/>
@@ -195,7 +223,22 @@ variant={
       {/* <DropdownMenuItem>View payment details</DropdownMenuItem> */}
     </DropdownMenuContent>
   </DropdownMenu>
-      ),
+
+
+                                 <AddProductDialog
+                                 open={open}
+                                 setOpen={setOpen}
+                                  defaultData={row.original}
+                                  setIsEdited={setIsEdited}
+                                  isEdited={isEdited}
+                                  trigger={
+                                    <div></div>
+                                  }
+                                />
+    </>
+        )
+
+      },
   },
 ];
 

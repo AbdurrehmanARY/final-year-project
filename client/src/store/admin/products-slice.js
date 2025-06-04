@@ -11,7 +11,7 @@ const initialState = {
     async (image) => {
         console.log('image in store',image)
       const response = await axios.post(
-        `http://localhost:3000/api/v1/admin/upload`,
+        `http://localhost:5000/api/v1/admin/upload`,
         { image }
       );
   console.log( 'res',response)
@@ -19,30 +19,47 @@ const initialState = {
     }
   );
 
-
-
 // add product 
 
 export const addNewProduct = createAsyncThunk(
   "/product/add",
   async (formData) => {
-    // console.log("form data in slice",formData)
+    console.log("form data in slice",formData)
     const response = await axios.post(
-      `http://localhost:3000/api/v1/admin/add`,
+      `http://localhost:5000/api/v1/admin/add`,
+      
       formData, // Send formData directly
       {
         headers: {
           "Content-Type": "application/json",
         },
       }
-    );
-    const data= response.data
-//  console.log(data)   
-return  data
+    );   
+return  response.data
     
   }
 );
 
+// edit product 
+export const editProduct = createAsyncThunk(
+  "/products/editProduct",
+  async ({id, formData }) => {
+    console.log("id is",id)
+
+    console.log("form data",formData)
+    const result = await axios.put(
+      `http://localhost:5000/api/v1/admin/edit/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return result?.data;
+  }
+);
 
 
 
@@ -54,7 +71,7 @@ export const deleteProduct = createAsyncThunk(
     try {
       console.log(id);
       const response = await axios.delete(
-        `http://localhost:3000/api/v1/admin/delete/${id}`
+        `http://localhost:5000/api/v1/admin/delete/${id}`
       );
       const data = response.data;
       return data;
@@ -73,7 +90,19 @@ export const getAllProducts = createAsyncThunk(
   "/products/getProduct",
   async () => {
     const result = await axios.get(
-      "http://localhost:3000/api/v1/admin/all"
+      "http://localhost:5000/api/v1/admin/all"
+    );
+// console.log(result)
+    return result.data;
+  }
+);
+
+export const getProductDetail = createAsyncThunk(
+  "/products/getSingleProduct",
+  async (id) => {
+    // console.log("id in slice",id)
+    const result = await axios.get(
+      `http://localhost:5000/api/v1/admin/single/${id}`
     );
 // console.log(result)
     return result.data;
@@ -96,10 +125,10 @@ extraReducers:(builder)=>{
     state.isLoading=true
   }).addCase(getAllProducts.fulfilled,(state,{payload})=>{
     state.isLoading=false
-    state.listOfProduct=payload.data
+    state.listOfProduct=payload?.data
   }).addCase(getAllProducts.rejected,(state,{paylaod})=>{
 state.isLoading=false
-state.listOfProduct=paylaod.data
+state.listOfProduct=paylaod?.data
   })
 }
 

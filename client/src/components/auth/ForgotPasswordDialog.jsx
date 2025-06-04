@@ -12,7 +12,7 @@ const ForgotPasswordDialog = ({open,onOpenChange  }) => {
     const [formData,setFormData]=useState({})
   
     const onSubmitForm = (data) => setFormData(data)
-    console.log('data is',formData)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild></DialogTrigger>

@@ -9,25 +9,39 @@ import { registerUser } from "../../store/auth";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-const RegisterDialog = ({ open,onOpenChange,openLogin }) => {
+const RegisterDialog = ({isLoading, open,onOpenChange,openLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const{register,handleSubmit}=useForm()
   
   const [formData,setFormData]=useState({})
   const dispatch=useDispatch()
 
-  const onSubmitForm = (data) => {
-    console.log('working')
-    setFormData(data)
-    // console.log(formData)
-  dispatch(registerUser(data)).then((data)=>
-  {
-    if(data){toast(data.payload.message)
-    openLogin()
+  const onSubmitForm = async(data) => {
+   try {
+    const result = await dispatch(registerUser(data));
+    console.log("Registration result:", result);
+    if (result && result.payload && result.payload.success) {
+      toast(result.payload.message);
+      openLogin();
     }
-      else toast('something went wrong')
+    else {
+      toast.error(result.payload.message);
+    }
+  }  catch (error) {
+    console.error("Registration error:", error);
+    // Handle bad request or other errors from backend
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "An error occurred";
+    toast.error(message);
+    console.error(message);
   }
-  )
+    finally{
+      console.log(formData)
+    }
+
+  
 
 
   }
@@ -78,7 +92,7 @@ const RegisterDialog = ({ open,onOpenChange,openLogin }) => {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="absolute right-0 top-0 h-full px-3 py-2"
+                  className="absolute right-0 top-0 h-full px-3 py-2 cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -90,8 +104,8 @@ const RegisterDialog = ({ open,onOpenChange,openLogin }) => {
               </div>
             </div>
 
-            <Button className="w-full bg-[#E16F3D] hover:bg-orange-600 h-12">
-              Register
+            <Button className="w-full bg-[#E16F3D] hover:bg-orange-600 h-12 cursor-pointer">
+              {isLoading ? "Registering..." : "Register"}
             </Button>
 
             <div className="relative flex py-4 items-center">
@@ -101,7 +115,7 @@ const RegisterDialog = ({ open,onOpenChange,openLogin }) => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="h-12">
+              <Button variant="outline" className="h-12 cursor-pointer">
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -122,7 +136,7 @@ const RegisterDialog = ({ open,onOpenChange,openLogin }) => {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="h-12">
+              <Button variant="outline" className="h-12 cursor-pointer">
                 <svg
                   className="w-5 h-5 mr-2 text-[#1877F2]"
                   xmlns="http://www.w3.org/2000/svg"
@@ -142,7 +156,7 @@ const RegisterDialog = ({ open,onOpenChange,openLogin }) => {
         <div className="py-4 text-center border-t">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <Button variant="link"  onClick={openLogin} className="p-0 text-orange-500 font-medium">
+            <Button variant="link"  onClick={openLogin} className="p-0 text-orange-500 font-medium cursor-pointer">
               Log In
             </Button>
           </p>

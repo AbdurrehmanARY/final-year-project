@@ -1,0 +1,6 @@
+-- AlterEnum
+ALTER TYPE "OrderStatus" ADD VALUE 'PROCESSING';
+
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN     "payerId" INTEGER DEFAULT 0,
+ALTER COLUMN "paymentId" SET DEFAULT 0;

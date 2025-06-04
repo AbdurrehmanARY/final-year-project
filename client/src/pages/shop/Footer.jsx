@@ -1,6 +1,9 @@
+import { Smartphone } from 'lucide-react'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 function Footer() {
+  const navigate=useNavigate()
+
   return (
     <>
     <footer className="bg-white py-12 px-4 md:px-8 border-t">
@@ -8,7 +11,13 @@ function Footer() {
           {/* Logo and Info */}
           <div>
             <div className="flex items-center mb-4">
-              <div className="font-semibold text-xl">LUX</div>
+              {/* <div className="font-semibold text-xl">LUX</div> */}
+              <div onClick={()=>navigate('/')} className="flex items-center space-x-2">
+              <Smartphone className="w-6 h-6 text-orange-600" />
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 via-red-500 to-orange-700 bg-clip-text text-transparent">
+                MobileHub
+              </h1>
+            </div>
             </div>
             <p className="text-base  text-[#525252] mb-4">
             Finding your fashion has never been easier. Browse the best selection of famous fashion brands that suit your style and preferences.

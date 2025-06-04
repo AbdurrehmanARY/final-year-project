@@ -3,7 +3,7 @@ import { brand, category, specs, stockStatus } from "@/config";
 
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
-import { addNewProduct, getAllProducts } from '@/store/admin/products-slice';
+import { addNewProduct, editProduct, getAllProducts } from '@/store/admin/products-slice';
 import axios from 'axios';
 import {
   Dialog,
@@ -25,9 +25,9 @@ import { toast } from 'sonner';
 
 
 
-function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
-  console.log( "is edited",isEdited)
 
+function AddProductDialog({trigger,open,setOpen,defaultData,setIsEdited,isEdited} ) {
+  
   const { register, handleSubmit, reset, setValue, watch } = useForm(
   {
     defaultValues : {
@@ -41,31 +41,31 @@ function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
       stock: defaultData?.stock || '',
       stockStatus: defaultData?.stockStatus || '',
       // display 
-      displaySize: defaultData?.displaySize || '',
-      displaytype: defaultData?.displaytype || '',
-      refreshRate: defaultData?.refreshRate || '',
-      resolution: defaultData?.resolution || '',
+      displaySize: defaultData?.specs?.displaySize?.value || '',
+      displaytype: defaultData?.specs?.displaytype?.value || '',
+      refreshRate: defaultData?.specs?.refreshRate?.value || '',
+      resolution: defaultData?.specs?.resolution?.value || '',
     
       // // storage 
-      storage: defaultData?.storage || '',
+      storage: defaultData?.specs?.storage?.value || '',
     
       // // camera 
-      backCamera: defaultData?.backCamera || '',
-      frontCamera: defaultData?.frontCamera || '',
+      backCamera: defaultData?.specs?.backCamera?.value || '',
+      frontCamera: defaultData?.specs?.frontCamera?.value || '',
       // // network 
-      sim: defaultData?.sim || '',
-      network: defaultData?.network || '',
+      sim: defaultData?.specs?.sim?.value || '',
+      network: defaultData?.specs?.network?.value || '',
     
       // // charging and Battery
-      charging: defaultData?.charging || '',
-      battery: defaultData?.battery || '',
-      usbPort: defaultData?.usbPort || '',
+      charging: defaultData?.specs?.charging?.value || '',
+      battery: defaultData?.specs?.battery?.value || '',
+      usbPort: defaultData?.specs?.usbPort?.value || '',
       // // processer 
-      processor: defaultData?.processor || '',
-      untututu: defaultData?.untututu || '',
+      processor: defaultData?.specs?.processor?.value || '',
+      untututu: defaultData?.specs?.untututu?.value || '',
     
       // // os
-      os: defaultData?.os || '',
+      os: defaultData?.specs?.os?.value || '',
       image: [],
       colors: []
     
@@ -73,8 +73,10 @@ function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
 
   }
   );
+
+  const [customSpecs, setCustomSpecs] = useState([{ key: "", value: "" }]);
   const dispatch = useDispatch()
-  const [open, setOpen] = useState(false)
+  // const [open, setOpen] = useState(false)
   const [image, setImage] = useState(defaultData?.image || [])
   const [colors, setColors] = useState(defaultData?.colors || [])
   const [newColor, setNewColor] = useState("");
@@ -92,16 +94,17 @@ function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
     });
 
 
+
     try {
       setUploading(true)
-      const response = await axios.post(`http://localhost:3000/api/v1/admin/upload`, formData, {
+      const response = await axios.post(`http://localhost:5000/api/v1/admin/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data", // Set the correct content type
         },
       })
       const imageLink = response.data.result
       setImage((prev) => [...prev, imageLink]); // Add the new link to the image state
-      console.log(image)
+      
     }
     catch (e) {
       console.log(e)
@@ -133,29 +136,97 @@ function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
     )
 
   };
+// Watch all fields
+  const watchedValues = watch("category");
 
+  // Log watched values on change
+  useEffect(() => {
+    console.log("Form values changed:", watchedValues);
+  }, [watchedValues]);
 
   // Submit function 
+      
+
   const onSubmit = async (data) => {
-    const data2Send = {
-      ...data,
-      stock: parseInt(data.stock),
-      price: parseInt(data.price),
-      salePrice: parseInt(data.salePrice),
-      image, colors
-    }
-    const response = await dispatch(addNewProduct(data2Send))
-    if (response?.payload.success) {
+
+      let specsObj = {};
+
+  if (watchedValues === "Mobile Phones") {
+    // Build specsObj from static specs config
+    specs.forEach(section => {
+      section.spec.forEach(field => {
+        specsObj[field.id] = {
+          label: field.label,
+          value: data[field.id]
+        };
+      });
+    });
+  }
+  // else {
+  //   // Build specsObj from customSpecs (key-value pairs) in {label, value} format
+  //   customSpecs.forEach(spec => {
+  //     if (spec.key && spec.value) {
+  //       specsObj[spec.key] = {
+  //         label: spec.key,
+  //         value: spec.value
+  //       };
+  //     }
+  //   });
+  // }
+
+  const customSpecsArr = customSpecs
+    .filter(spec => spec.key && spec.value)
+    .map(spec => ({
+      label: spec.key,
+      value: spec.value
+    }));
+
+  // Remove static spec fields from data
+  const dataCopy = { ...data };
+  specs.forEach(section => {
+    section.spec.forEach(field => {
+      delete dataCopy[field.id];
+    });
+  });
+
+  const data2Send = {
+    ...dataCopy,
+    specs: watchedValues === "Mobile Phones" ? specsObj : customSpecsArr,
+    stock: parseInt(data.stock),
+    price: parseInt(data.price),
+    salePrice: parseInt(data.salePrice),
+    image,
+    colors
+  };
+
+      console.log('data 2 send is',data2Send)
+     
+
+    if(isEdited){
+      const id=defaultData.id
+      console.log('data 2 send is',data2Send)
+    const response = await dispatch(editProduct({id,formData:data2Send})).then((data) =>{
+        console.log('response is',data.payload)
+        if (data?.payload?.success) {
     dispatch(getAllProducts())
-      toast(response.payload.message)
+      toast(data.payload.message)
+    }
+       })
+    
     }
     else {
-      toast('error occur')
-
+       dispatch(addNewProduct(data2Send)).then((data) =>{
+        if (data?.payload?.success) {
+    dispatch(getAllProducts())
+      toast(data.payload.message)
     }
+       })
 
+    
+    }
     setImage([])
     setColors([])
+    setIsEdited(false)
     setOpen(false)
     reset();
   };
@@ -334,7 +405,8 @@ function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
                 {/* Specifivation Tab */}
                 <TabsContent value="specification" className="space-y-6 h-[400px] ">
 
-                  {specs.map((value, index) => (
+{watchedValues==="Mobile Phones" ?
+specs.map((value, index) => (
                     <div key={index}>
                       <h1 className="text-xl"> {value.heading}</h1>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6  ">
@@ -347,6 +419,7 @@ function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
                               ?
                               <input {...register(value.id)} placeholder={value.placeholder} className="w-full border rounded-md p-2" />
                               :
+                              <>
                               <select
                                 {...register(value.id)}
                                 placeholder='add product'
@@ -361,12 +434,75 @@ function AddProductDialog({trigger,defaultData,setIsEdited,isEdited} ) {
 
                                 ))}
                               </select>
+                              <input type="text" />
+                              
+                              </>
+                              
                             }
                           </div>
                         ))}
                       </div>
                     </div>
-                  ))}
+                  ))
+:
+
+ <div>
+    {customSpecs.map((spec, idx) => (
+      <div key={idx} className="flex gap-2 mb-2">
+        <input
+          type="text"
+          className="w-full border rounded-md p-2"
+          placeholder="Title"
+          value={spec.key}
+          onChange={e => {
+            const updated = [...customSpecs];
+            updated[idx].key = e.target.value;
+            setCustomSpecs(updated);
+          }}
+        />
+        <input
+          type="text"
+          className="w-full border rounded-md p-2"
+          placeholder="Value"
+          value={spec.value}
+          onChange={e => {
+            const updated = [...customSpecs];
+            updated[idx].value = e.target.value;
+            setCustomSpecs(updated);
+          }}
+        />
+        <button
+          type="button"
+          className="p-2 bg-gray-200 rounded"
+          onClick={() => setCustomSpecs([...customSpecs, { key: "", value: "" }])}
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+        {customSpecs.length > 1 && (
+          <button
+            type="button"
+            className="p-2 bg-red-200 rounded"
+            onClick={() => setCustomSpecs(customSpecs.filter((_, i) => i !== idx))}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      ))}
+  </div>
+
+}
+
+
+
+
+
+
+
+
+
+
+
                 </TabsContent>
 
                 {/* Attributes Tab */}

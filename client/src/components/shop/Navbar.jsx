@@ -1,6 +1,6 @@
-import { Moon, Search, ShoppingCart, UserRound } from 'lucide-react'
+import { Moon, Search, ShoppingCart, Smartphone, UserRound } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../ui/button'
 import LoginDialog from '../auth/LoginDialog'
 import RegisterDialog from '../auth/RegisterDialog'
@@ -22,9 +22,8 @@ function Navbar() {
 
   const dispatch=useDispatch() 
   const isAuth=useSelector((state)=>state.auth)
-  const {isAuthenticated,user}=isAuth
-  console.log('isAuth is',isAuthenticated)
-  console.log('user is',user)
+  const {isLoading,isAuthenticated,user}=isAuth
+  const navigate=useNavigate()
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -52,11 +51,9 @@ function Navbar() {
   
   return (
    <>
-   <header className="bg-white py-4 px-4 md:px-12 flex items-center justify-between ">
+   <header className="fixed top-0 left-0 w-full z-50 bg-white py-4 px-4 md:px-12 flex items-center justify-between ">
    
            <div className="flex items-center space-x-8">
-           
-           
            <NavbarSheet
            trigger={
             <Button className=" block md:hidden text-black bg-transparent  ">
@@ -68,7 +65,7 @@ function Navbar() {
 
              <nav className="hidden md:flex items-center space-x-6">
              
-               <Link to="/home" className="text-sm font-medium text-black hover:text-gray-600">
+               <Link to="/" className="text-sm font-medium text-black hover:text-gray-600">
                  Home
                </Link>
                <Link to="/listing" className="text-sm font-medium text-gray-500 hover:text-gray-600">
@@ -84,9 +81,12 @@ function Navbar() {
            </div>
           
            
-           <div className="flex items-center">
-             <div className="font-semibold text-xl">LUX</div>
-           </div>
+           <div onClick={()=>navigate('/')} className="flex items-center space-x-2">
+              <Smartphone className="w-6 h-6 text-orange-600" />
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 via-red-500 to-orange-700 bg-clip-text text-transparent">
+                MobileHub
+              </h1>
+            </div>
    
            <div className="flex items-center space-x-2">
             
@@ -105,7 +105,8 @@ function Navbar() {
         />
 
 
-          {!isAuthenticated ? <LoginDialog
+          {!isAuthenticated ? 
+          <LoginDialog
             open={isLoginOpen}
             onOpenChange={setIsLoginOpen}
             openRegister={openRegister}
@@ -121,6 +122,10 @@ function Navbar() {
             }
           /> :
           <AccountDropdown
+          open={isLoginOpen}
+            onOpenChange={setIsLoginOpen}
+            openRegister={openRegister}
+            openForgotPassword={openForgotPassword}
 
         trigger={<Button className="w-10 h-10 rounded-full bg-transparent hover:bg-transparent border flex justify-center items-center">
           <FaUser className=" text-black" />
@@ -133,6 +138,7 @@ function Navbar() {
 
           {/* Register Dialog */}
           <RegisterDialog
+          isLoading={isLoading}
             open={isRegisterOpen}
             onOpenChange={setIsRegisterOpen}
             openLogin={openLogin}

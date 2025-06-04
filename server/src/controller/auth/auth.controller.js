@@ -5,12 +5,11 @@ import sendCookie from "../../utils/cookie.js";
 
 //register
 export const registerUser = async (req, res) => {
-
   const { userName, email, password } = req.body;
-
+// process.stdout.write("working\n");
   try {
     if(!userName || !email || !password){
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "please enter all field",
 
@@ -22,7 +21,7 @@ export const registerUser = async (req, res) => {
       }
     })
     if (checkUser)
-      return res.json({
+      return res.status(409).json({
         success: false,
         message: "User Already exists with the same email! Please try again",
       });
@@ -33,10 +32,11 @@ export const registerUser = async (req, res) => {
   data: {
     userName,
     email,
+    role:'USER',
     password:hashPassword
   },
 });
-
+// console.log(user)
 sendCookie(user, res, "Register successfully", 202);
   } catch (e) {
     console.log(e);
@@ -64,9 +64,6 @@ const { email, password } = req.body;
           email
         }
       })
-    
-      
-    
     if (!user)
       return res.json({
         success: false,
@@ -95,10 +92,30 @@ const { email, password } = req.body;
 //logout
 
 export const logoutUser = (req, res) => {
- res.clearCookie("token").json({
-    success: true,
-    message: "Logged out successfully!",
-  });
+  console.log('cookie is',req.cookies)
+  console.log('logout working')
+//  return res.clearCookie("token", {
+//     httpOnly: true,
+//    sameSite: 'Lax',
+// secure: true
+
+//   }).json({
+//     success: true,
+//     message: "Logged out successfully!",
+//   });
+
+  res
+    .status(200)
+    .cookie("token", "", {
+      expires: new Date(Date.now()),
+      sameSite:  "lax" ,
+      secure: false ,
+    })
+    .json({
+      success: true,
+      message:'Logout Successfully'
+      // user: req.user,
+    });
 };
 
 //auth middleware
@@ -106,13 +123,20 @@ export const logoutUser = (req, res) => {
 
 
 
-
+ 
   export const myProfile = async (req, res,next) => {
-  
+  if(!req.user){
+res.status(401).json({
+  success: false,
+    message: "login please",
+    // user: req.user,
+  });
+  }
   
   res.json({
+    success: true,
     message: "my profile",
-    user: req.user,
+     user: req.user,
   });
 };
 

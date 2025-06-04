@@ -29,9 +29,43 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+import { logoutUser } from "@/store/auth"
+import { useDispatch } from "react-redux"
 
 export function NavUser({ user }) {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+
   const { isMobile } = useSidebar()
+  const handleLogout=async()=>{
+   const response=await dispatch(logoutUser())
+   if(response?.payload?.success){
+    toast.success(response?.payload?.message)
+    navigate("/")
+return(
+  <>
+  <LoginDialog
+            open={open}
+            onOpenChange={onOpenChange}
+            openRegister={openRegister}
+            openForgotPassword={openForgotPassword}
+            trigger={
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden md:flex border border-[#E16F3D] text-[#E16F3D] hover:text-[#E16F3D] rounded-[20px]"
+              >
+                Login
+              </Button>
+            }
+          />
+  </>
+)
+   }
+  }
 
   return (
     <SidebarMenu>
@@ -94,7 +128,7 @@ export function NavUser({ user }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -1,7 +1,9 @@
 import { ShoppingBag } from 'lucide-react'
 import { Button } from '../ui/button'
+import { useNavigate } from 'react-router-dom'
 
 function EmptyCart() {
+  const navigate=useNavigate()
   return (
     <>
      <div className="flex flex-col items-center justify-center max-w-md mx-auto px-4 py-12">
@@ -18,7 +20,7 @@ function EmptyCart() {
         </p>
       </div>
 
-      <Button className="bg-[#e67d4e] hover:bg-[#d46c3d] text-white rounded-full px-8 py-6 h-auto font-medium">
+      <Button onClick={()=>navigate('/listing')} className="bg-[#e67d4e] hover:bg-[#d46c3d] text-white rounded-full px-8 py-6 h-auto font-medium">
         Shop Now
       </Button>
     </div>

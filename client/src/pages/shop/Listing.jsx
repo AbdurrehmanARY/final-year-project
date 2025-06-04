@@ -1,41 +1,126 @@
 
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { ChevronRight, X, ChevronDown, ChevronUp, Search, ShoppingBag, SlidersHorizontal } from "lucide-react"
 import ProductCard from "../../components/shop/ProductCard"
 import ReuseDropdown from "../../components/shop/ReuseDropdown"
+import { useDispatch, useSelector } from "react-redux"
+import { getAllProducts } from "@/store/admin/products-slice"
+import { sortOptions } from "@/config"
+import { category } from "@/config"
+import { brand } from "@/config"
+import { color } from "@/config"
+import { fetchAllFilteredProducts } from "@/store/shop/product"
+import PaginationComp from "@/components/common/PaginationComp"
+import { Input } from "@/components/ui/input"
+import { getSearchResults } from "@/store/shop/search"
+import { Slider } from "@/components/ui/slider"
+
+
+
+
+function createSearchParamsHelper(filters) {
+  // Flattens arrays for URLSearchParams, e.g. {brand: ['Apple','Samsung']} => {brand: 'Apple,Samsung'}
+  const params = {};
+  Object.entries(filters).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      params[key] = value.join(',');
+    } else {
+      params[key] = value;
+    }
+  });
+  // console.log("params", params);
+  return params;
+}
 
 function Listing() {
 
-  
-
+  const navigate=useNavigate()
+const dispatch=useDispatch()
+useEffect(() => {
+  dispatch(getAllProducts());
+}, [dispatch]);
+  const {listOfProduct}=useSelector((state)=>state.adminProducts)
+  const {productList}=useSelector((state)=>state.filteredProducts)
+  // const {searchResults}=useSelector((state)=>state.search)
+  // console.log("searchResults", searchResults);
   const [filterOpen, setFilterOpen] = useState(false)
   const [mobileView, setMobileView] = useState(false)
+  const [sort, setSort] = useState(sortOptions[0]?.id)
+  const [filter, setFilter] = useState([])
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [priceRange, setPriceRange] = useState([1, 80000]);
+   const [page, setPage] = useState(1);
+        const [limit, setLimit] = useState(14);
+  const { totalPages } = useSelector((state) => state.filteredProducts);
+
+  
   const [expandedSections, setExpandedSections] = useState({
     "Kind of Product": true,
     Price: true,
-    Color: true,
-    Style: true,
+    // Color: true,
+    // Style: true,
   })
-  const option=[
-    {
-      label:"price:high to low"
-    }
-,
-    {
-      label:"price:low to high"
-    }
-  ]
+  console.log("priceRange", priceRange);
 
-  const [appliedFilters, setAppliedFilters] = useState({
-    categories: [],
-    colors: ["Gray", "Browns"],
-    styles: ["Casual"],
+// const [sort, setSort] = useState()
+   const [appliedFilters, setAppliedFilters] = useState({
+    brand: [],
+    category: [],
+    color: [],
     priceRange: [40, 80],
-  })
+  });
 
-  const [searchQuery, setSearchQuery] = useState("Casual")
-  const [cart, setCart] = useState([])
+
+  useEffect(() => {
+  setAppliedFilters((prev) => ({
+    ...prev,
+    priceRange,
+  }));
+}, [priceRange]);
+
+
+  // Filter products based on selected categories
+  const filteredProducts = listOfProduct.filter((product) => {
+    // If no category filter is applied, show all
+ const brandMatch = appliedFilters.brand.length === 0 ||
+    appliedFilters.brand.includes(product.brand);
+
+  return brandMatch;
+  });
+//   console.log("Filtered Products:", filteredProducts);
+// console.log("appliedFilters", appliedFilters);
+
+  //  sessionStorage.setItem("filters", JSON.stringify(filteredProducts));
+  //  console.log("sessionP", sessionP);
+
+  const [searchQuery, setSearchQuery] = useState("")
+
+// const pro=JSON.parse(sessionStorage.getItem("filters"))
+// console.log("pro", pro);
+// useEffect(() => {
+//   setFilter(JSON.parse(sessionStorage.getItem("filters")))
+// })
+// console.log("Filtered Products:", filter);
+
+
+// useEffect(() => {
+//   setFilter(JSON.parse(sessionStorage.getItem("filters")) || []);
+// }, []);
+
+// useEffect(() => {
+//   console.log("Filtered Products:", filter);
+// }, [filter]);
+ 
+
+
+  // const [cart, setCart] = useState([])
+//  setFilter(JSON.parse(sessionStorage.getItem("filters")) || {});
+//    console.log("Filtered Products:", filter);
+// useEffect(() => {
+//   setFilter(JSON.parse(sessionStorage.getItem("filters")) || {});
+//    console.log("Filtered Products:", filter);
+// },[filter])
 
   useEffect(() => {
     const handleResize = () => {
@@ -49,6 +134,51 @@ function Listing() {
       window.removeEventListener("resize", handleResize)
     }
   }, [])
+
+
+useEffect(() => {
+  if (appliedFilters && Object.keys(appliedFilters).length > 0) {
+    const createQueryString = createSearchParamsHelper(appliedFilters);
+    // console.log("createQueryString", createQueryString);
+    setSearchParams(new URLSearchParams(createQueryString));
+  }
+}, [appliedFilters, setSearchParams]);
+// console.log("searchParams", searchParams.toString());
+
+// console.log("sort", sort);
+// console.log("appliedFilters", appliedFilters);
+
+
+  useEffect(() => {
+    if (appliedFilters !== null && sort !== null)
+      dispatch(
+    fetchAllFilteredProducts({ filterParams: appliedFilters, sortParams: sort,page,limit})).then(data=>console.log("filter data in ",data.payload))
+  }, [dispatch, sort, appliedFilters,
+    page,limit
+
+  ]);
+
+
+  
+// search use Effect 
+useEffect(() => {
+  if (searchQuery && searchQuery.trim() !== "" && searchQuery.trim().length > 3) {
+    setTimeout(() => {
+      setSearchParams(new URLSearchParams(`?keyword=${searchQuery}`));
+      dispatch(getSearchResults({keyword: searchQuery, filterParams: appliedFilters, sortParams: sort, page, limit}));
+    }, 1000);
+  } else if (searchQuery === "" || searchQuery.trim().length <= 3) {
+    // Remove the keyword param from the URL
+    setSearchParams({});
+    // Optionally reset search results here if needed
+    // dispatch(resetSearchResults());
+  }
+}, [searchQuery, sort, appliedFilters, page, limit]);
+
+  // console.log("searchQuery", searchQuery);
+  // console.log('searchParams', searchParams.toString());
+
+
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -77,30 +207,29 @@ function Listing() {
 
   const resetAllFilters = () => {
     setAppliedFilters({
-      categories: [],
+      brand: [],
+      category: [],
       colors: [],
-      styles: [],
-      priceRange: [40, 80],
+      priceRange: [1, 80000],
+
+
     })
     setSearchQuery("")
   }
 
-  const addToCart = (productId) => {
-    setCart((prev) => {
-      const existingItem = prev.find((item) => item.id === productId)
-      if (existingItem) {
-        return prev.map((item) =>
-          item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
-        )
-      } else {
-        return [...prev, { id: productId, quantity: 1 }]
-      }
-    })
+  
+
+  // const getAllAppliedFilters = () => {
+  //   return [...appliedFilters.brand, ...appliedFilters.colors, ...appliedFilters.styles]
+  // }
+  const getAllAppliedFilters = () => {
+    return [...appliedFilters.brand]
   }
 
-  const getAllAppliedFilters = () => {
-    return [...appliedFilters.categories, ...appliedFilters.colors, ...appliedFilters.styles]
-  }
+  console.log("appliedFilters", appliedFilters);
+  const searchResults = useSelector((state) => state.search.searchResults);
+  console.log("searchResults", searchResults);
+  
 
 
   
@@ -123,7 +252,7 @@ function Listing() {
       {/* Search Bar - Desktop */}
       <div className="relative mb-6 hidden md:block">
         <div className="relative">
-          <input
+          <Input
             type="text"
             placeholder="Search"
             value={searchQuery}
@@ -144,17 +273,19 @@ function Listing() {
         <h1 className="text-2xl font-bold">
           {searchQuery ? (
             <>
-              Search Result (48) <span className="text-orange-500">"{searchQuery}"</span>
+              Search Result ({searchResults.length}) <span className="text-orange-500">"{searchQuery}"</span>
             </>
           ) : (
-            <>All Products (481)</>
+            <>All Products ({listOfProduct.length})</>
           )}
         </h1>
         <div className="flex items-center gap-4">
           <div className="relative">
 
             <ReuseDropdown
-            option={option}
+            sort={sort}
+            setSort={setSort}
+            option={sortOptions}
             
             trigger={
 <button className="flex items-center gap-2 px-4 py-2 border rounded-full">
@@ -183,67 +314,32 @@ function Listing() {
           <button onClick={resetAllFilters} className="text-orange-500 text-sm hover:underline">
             Reset All Filter
           </button>
-
-          {appliedFilters.styles.includes("Casual") && (
-            <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
-              <span>Casual</span>
-              <button onClick={() => removeFilter("styles", "Casual")}>
-                <X className="h-4 w-4 ml-1" />
-              </button>
-            </div>
-          )}
-
-          {appliedFilters.colors.includes("Gray") && (
-            <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
-              <span>Gray</span>
-              <button onClick={() => removeFilter("colors", "Gray")}>
-                <X className="h-4 w-4 ml-1" />
-              </button>
-            </div>
-          )}
-
-          {appliedFilters.colors.includes("Browns") && (
-            <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
-              <span>Browns</span>
-              <button onClick={() => removeFilter("colors", "Browns")}>
-                <X className="h-4 w-4 ml-1" />
-              </button>
-            </div>
-          )}
         </div>
       )}
 
       <div className="flex flex-col md:flex-row gap-8 ">
         {/* Products Grid */}
         <div className="w-full  order-2 md:order-1 ">
-          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3   ${filterOpen ?"xl:grid-cols-3":"xl:grid-cols-4"}  gap-6 `}>
-            <ProductCard/>
-            <ProductCard/>
-            <ProductCard/>
-            <ProductCard/>
-            <ProductCard/>
-
-
+           <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3   ${filterOpen ?"xl:grid-cols-3":"xl:grid-cols-4"}  gap-6 `}>
+            
+           {searchQuery && searchQuery.trim().length > 3 && searchResults.length > 0
+  ? searchResults.map((product, index) => (
+      <ProductCard key={product.id || index} index={index} product={product} />
+    ))
+  : productList.map((product, index) => (
+      <ProductCard key={product.id || index} index={index} product={product} />
+    ))
+}
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-center items-center mt-10 space-x-2">
-            <button className="flex items-center px-3 py-1 border rounded hover:bg-gray-50">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
-            </button>
-            <button className="px-3 py-1 border rounded hover:bg-gray-50">1</button>
-            <button className="px-3 py-1 border rounded bg-orange-500 text-white">2</button>
-            <button className="px-3 py-1 border rounded hover:bg-gray-50">3</button>
-            <span className="px-2">...</span>
-            <button className="px-3 py-1 border rounded hover:bg-gray-50">8</button>
-            <button className="px-3 py-1 border rounded hover:bg-gray-50">9</button>
-            <button className="px-3 py-1 border rounded hover:bg-gray-50">10</button>
-            <button className="flex items-center px-3 py-1 border rounded hover:bg-gray-50">
-              Next
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </button>
-          </div>
+
+<PaginationComp
+  page={page}
+  setPage={setPage}
+  totalPages={totalPages}
+   limit={limit}
+/>
+
         </div>
 
         {/* Filter Sidebar - Desktop */}
@@ -262,193 +358,124 @@ function Listing() {
             </div>
 
             {/* Kind of Product */}
-            <FilterSection
-              title="Kind of Product"
-              expanded={expandedSections["Kind of Product"]}
-              onToggle={() => toggleSection("Kind of Product")}
+
+
+
+
+
+
+
+
+            {/* filterating for brand */}
+              <FilterSection
+              title="Brand"
+              expanded={expandedSections["Brand"]}
+              onToggle={() => toggleSection("Brand")}
             >
               <div className="space-y-1">
-                <FilterItem
-                  label="Shirts"
-                  selected={appliedFilters.categories.includes("Shirts")}
-                  onClick={() => toggleFilter("categories", "Shirts")}
-                />
-                <FilterItem
-                  label="Coats"
-                  selected={appliedFilters.categories.includes("Coats")}
-                  onClick={() => toggleFilter("categories", "Coats")}
-                />
-                <FilterItem
-                  label="Skirts"
-                  selected={appliedFilters.categories.includes("Skirts")}
-                  onClick={() => toggleFilter("categories", "Skirts")}
-                />
-                <FilterItem
-                  label="Jeans"
-                  selected={appliedFilters.categories.includes("Jeans")}
-                  onClick={() => toggleFilter("categories", "Jeans")}
-                />
-                <FilterItem
-                  label="Pants"
-                  selected={appliedFilters.categories.includes("Pants")}
-                  onClick={() => toggleFilter("categories", "Pants")}
-                />
-                <FilterItem
-                  label="Heels"
-                  selected={appliedFilters.categories.includes("Heels")}
-                  onClick={() => toggleFilter("categories", "Heels")}
-                />
-                <FilterItem
-                  label="Dresses"
-                  selected={appliedFilters.categories.includes("Dresses")}
-                  onClick={() => toggleFilter("categories", "Dresses")}
-                />
-                <FilterItem
-                  label="Sneakers"
-                  selected={appliedFilters.categories.includes("Sneakers")}
-                  onClick={() => toggleFilter("categories", "Sneakers")}
-                />
-                <FilterItem
-                  label="Shoes"
-                  selected={appliedFilters.categories.includes("Shoes")}
-                  onClick={() => toggleFilter("categories", "Shoes")}
-                />
+                {brand.map((item) => (
+                  <FilterItem
+                    key={item.id}
+                    label={item.label}
+                    selected={appliedFilters?.brand?.includes(item.label)}
+                    onClick={() => toggleFilter("brand", item.label)}
+                  />
+                ))}
               </div>
             </FilterSection>
 
-            {/* Price Range */}
-            <FilterSection title="Price" expanded={expandedSections["Price"]} onToggle={() => toggleSection("Price")}>
-              <div className="mt-4">
-                <div className="relative h-2 bg-gray-200 rounded-full">
-                  <div className="absolute h-2 bg-orange-500 rounded-full" style={{ width: "60%", left: "0%" }}></div>
-                  <div
-                    className="absolute h-4 w-4 bg-white border-2 border-orange-500 rounded-full -top-1 cursor-pointer"
-                    style={{ left: "0%" }}
-                  ></div>
-                  <div
-                    className="absolute h-4 w-4 bg-white border-2 border-orange-500 rounded-full -top-1 cursor-pointer"
-                    style={{ left: "60%" }}
-                  ></div>
-                </div>
-                <div className="flex justify-between mt-2">
-                  <span className="text-sm">$40</span>
-                  <span className="text-sm">$80</span>
-                </div>
+
+            <FilterSection
+              title="Category"
+              expanded={expandedSections["Category"]}
+              onToggle={() => toggleSection("Category")}
+            >
+              <div className="space-y-1">
+                {category.map((item) => (
+                  <FilterItem
+                    key={item.id}
+                    label={item.label}
+                    selected={appliedFilters?.category?.includes(item.label)}
+                    onClick={() => toggleFilter("category", item.label)}
+                  />
+                ))}
               </div>
             </FilterSection>
+
+
 
             {/* Color */}
             <FilterSection
-              title="Color (2)"
+              title={`Color (${color.length})`}
               expanded={expandedSections["Color"]}
               onToggle={() => toggleSection("Color")}
             >
               <div className="grid grid-cols-4 gap-4 mt-4">
-                <ColorOption
+
+                {color.map((item) => (
+  <ColorOption
+    key={item.id}
+    color={item.color}
+    label={item.label}
+    selected={appliedFilters?.color?.includes(item.label)}
+    onClick={() => toggleFilter("color", item.label)}
+  />
+))}
+                {/* <ColorOption
                   color="bg-yellow-300"
                   label="Yellows"
-                  selected={appliedFilters.colors.includes("Yellows")}
+                  selected={appliedFilters.color.includes()}
                   onClick={() => toggleFilter("colors", "Yellows")}
-                />
-                <ColorOption
-                  color="bg-purple-500"
-                  label="Purple"
-                  selected={appliedFilters.colors.includes("Purple")}
-                  onClick={() => toggleFilter("colors", "Purple")}
-                />
-                <ColorOption
-                  color="bg-gray-400"
-                  label="Gray"
-                  selected={appliedFilters.colors.includes("Gray")}
-                  onClick={() => toggleFilter("colors", "Gray")}
-                />
-                <ColorOption
-                  color="bg-white border"
-                  label="White"
-                  selected={appliedFilters.colors.includes("White")}
-                  onClick={() => toggleFilter("colors", "White")}
-                />
-                <ColorOption
-                  color="bg-olive-500"
-                  label="Kaki"
-                  selected={appliedFilters.colors.includes("Kaki")}
-                  onClick={() => toggleFilter("colors", "Kaki")}
-                />
-                <ColorOption
-                  color="bg-amber-800"
-                  label="Browns"
-                  selected={appliedFilters.colors.includes("Browns")}
-                  onClick={() => toggleFilter("colors", "Browns")}
-                />
-                <ColorOption
-                  color="bg-pink-400"
-                  label="Roses"
-                  selected={appliedFilters.colors.includes("Roses")}
-                  onClick={() => toggleFilter("colors", "Roses")}
-                />
-                <ColorOption
-                  color="bg-black"
-                  label="Blacks"
-                  selected={appliedFilters.colors.includes("Blacks")}
-                  onClick={() => toggleFilter("colors", "Blacks")}
-                />
-                <ColorOption
-                  color="bg-green-600"
-                  label="Green"
-                  selected={appliedFilters.colors.includes("Green")}
-                  onClick={() => toggleFilter("colors", "Green")}
-                />
-                <ColorOption
-                  color="bg-red-800"
-                  label="Maroon"
-                  selected={appliedFilters.colors.includes("Maroon")}
-                  onClick={() => toggleFilter("colors", "Maroon")}
-                />
-                <ColorOption
-                  color="bg-orange-500"
-                  label="Orange"
-                  selected={appliedFilters.colors.includes("Orange")}
-                  onClick={() => toggleFilter("colors", "Orange")}
-                />
-                <ColorOption
-                  color="bg-amber-100"
-                  label="Beiges"
-                  selected={appliedFilters.colors.includes("Beiges")}
-                  onClick={() => toggleFilter("colors", "Beiges")}
-                />
+                /> */}
+                
+               
+                
               </div>
             </FilterSection>
 
-            {/* Style */}
-            <FilterSection title="Style" expanded={expandedSections["Style"]} onToggle={() => toggleSection("Style")}>
-              <div className="space-y-1">
-                <FilterItem
-                  label="Casual"
-                  selected={appliedFilters.styles.includes("Casual")}
-                  onClick={() => toggleFilter("styles", "Casual")}
-                />
-                <FilterItem
-                  label="Basic"
-                  selected={appliedFilters.styles.includes("Basic")}
-                  onClick={() => toggleFilter("styles", "Basic")}
-                />
-                <FilterItem
-                  label="Classic"
-                  selected={appliedFilters.styles.includes("Classic")}
-                  onClick={() => toggleFilter("styles", "Classic")}
-                />
-                <FilterItem
-                  label="Spot"
-                  selected={appliedFilters.styles.includes("Spot")}
-                  onClick={() => toggleFilter("styles", "Spot")}
-                />
-                <FilterItem
-                  label="Circular"
-                  selected={appliedFilters.styles.includes("Circular")}
-                  onClick={() => toggleFilter("styles", "Circular")}
-                />
-              </div>
-            </FilterSection>
+{/* price  */}
+<FilterSection
+  title="Price"
+  expanded={expandedSections["Price"]}
+  onToggle={() => toggleSection("Price")}
+>
+  <div className="mt-4">
+    <Slider
+      min={0}
+      max={80000}
+      step={1000}
+      value={priceRange}
+      onValueChange={setPriceRange}
+      range
+      className="w-full 
+
+        [&_[role=slider]]:h-4 
+        [&_[role=slider]]:w-4 
+        [&_[role=slider]]:bg-white 
+        [&_[role=slider]]:border-2 
+        [&_[role=slider]]:border-orange-500 
+        [&_[role=slider]]:rounded-full 
+        [&_[role=slider]]:-top-1 
+        [&_[role=slider]]:cursor-pointer 
+        [&_[role=slider-track]]:bg-orange-500 
+        [&_[role=slider-track]]:h-4 
+        [&_[role=slider-track]]:rounded-full 
+        [&_[role=slider-range]]:bg-orange-500 
+        [&_[role=slider-range]]:h-4 
+        [&_[role=slider-range]]:rounded-full
+        "
+    />
+
+        
+    <div className="flex justify-between mt-2 ">
+      <span className="text-sm text-gray-700">Rs.{priceRange[0]}</span>
+      <span className="text-sm text-gray-700">Rs.{priceRange[1]}</span>
+    </div>
+  </div>
+</FilterSection>
+
+
+
           </div>
         </div>
       </div>
@@ -478,13 +505,16 @@ function FilterItem({ label, selected, onClick }) {
       onClick={onClick}
     >
       <span className={selected ? "text-orange-500" : ""}>{label}</span>
-      <ChevronRight className="h-4 w-4" />
+      {/* <ChevronRight className="h-4 w-4" /> */}
     </button>
   )
 }
 
 // Color Option Component
+
+// ColorOption component
 function ColorOption({ color, label, selected, onClick }) {
+
   return (
     <button className="flex flex-col items-center" onClick={onClick}>
       <div
@@ -494,7 +524,7 @@ function ColorOption({ color, label, selected, onClick }) {
           <div className="absolute inset-0 flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className={`h-4 w-4 ${color === "bg-white border" || color === "bg-amber-100" || color === "bg-yellow-300" ? "text-black" : "text-white"}`}
+              className={`h-4 w-4 ${color === "bg-white border" ? "text-black" : "text-white"}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -506,7 +536,7 @@ function ColorOption({ color, label, selected, onClick }) {
       </div>
       <span className={`text-xs text-center ${selected ? "text-orange-500 font-medium" : ""}`}>{label}</span>
     </button>
-  )
+  );
 }
 
 // ChevronLeft icon component

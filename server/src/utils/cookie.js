@@ -1,21 +1,31 @@
 import jwt from "jsonwebtoken";
- const sendCookie = (user, res, message, statusCode = 200) => {
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
 
+const sendCookie = (user, res, message, statusCode = 200) => {
+  const token = jwt.sign({id: user.id,
+        role: user.role,
+        email: user.email,
+        userName: user.userName, }, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
 
   res
     .status(statusCode)
     .cookie("token", token, {
       httpOnly: true,
       maxAge: 15 * 60 * 1000,
-    //   sameSite: process.env.NODE_ENV === "Development" ? "lax" : "none",
-    //   secure: process.env.NODE_ENV === "Development" ? false : true,
+      sameSite: 'None',
+      secure: true // 'None' requires HTTPS + secure
+
     })
-    .json({
+  // console.log('cookie is in send cookie',req.cookies)
+    res.json({
       success: true,
-      user,
+      user: {
+        id: user.id,
+        userName: user.userName,
+        email: user.email,
+       role:user.role},
       message,
-      
     });
 };
 

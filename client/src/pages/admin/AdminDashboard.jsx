@@ -6,7 +6,23 @@ import RecentSale from "@/components/admin/dashboard/RecentSale"
 import Overview from "@/components/admin/dashboard/Overview"
 // import { RecentSales } from "@/components/dashboard/recent-sales"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
+import TotalCard from "@/components/admin/dashboard/TotalCard"
+import { useSelector } from "react-redux"
+import { DollarSign, Package, ShoppingBag, Users } from "lucide-react"
 function AdminDashboard() {
+  const {listOfProduct}=useSelector((state)=>state.adminProducts)
+  const {orderList}=useSelector((state)=>state.adminOrder)
+  console.log("orderList",orderList.length)
+  console.log("productList",listOfProduct.length)
+const totalRevenue = orderList.reduce((sum, order) => sum + (order.total || 0), 0);
+
+// console.log("productList of recent",orderList.reverse().slice(0,6))
+const recentOrders = [...orderList].reverse().slice(0, 6);
+recentOrders.map((Item,index)=>console.log('item',Item.id))
+
+
+
   return (
     <>
       {/* <DashboardShell> */}
@@ -14,7 +30,46 @@ function AdminDashboard() {
       {/* grid items-start gap-8 */}
     <div className="grid items-start gap-8">
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      
+      
+      
+      <TotalCard
+      // total={listOfProduct.length}
+          title='Total Revanue'
+          value={totalRevenue.toLocaleString()} 
+          change="+20.1%" 
+          icon={DollarSign}
+          index={0}
+      
+      />
+      <TotalCard
+       title="Total Orders" 
+          value={orderList.length}
+          change="+15.2%" 
+          icon={ShoppingBag}
+          index={1}
+      />
+      <TotalCard
+      title="Total Customers" 
+          value="1" 
+          change="+8.5%" 
+          icon={Users}
+          index={2}
+      />
+      <TotalCard
+      title="Products" 
+          value={listOfProduct.length}
+          change="+3.2%" 
+          icon={Package}
+          index={3}
+      />
+
+      
+      
+      
+      
+      
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             <svg
@@ -34,8 +89,8 @@ function AdminDashboard() {
             <div className="text-2xl font-bold">$45,231.89</div>
             <p className="text-xs text-muted-foreground">+20.1% from last month</p>
           </CardContent>
-        </Card>
-        <Card>
+        </Card> */}
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sales</CardTitle>
             <svg
@@ -99,7 +154,7 @@ function AdminDashboard() {
             <div className="text-2xl font-bold">1,324</div>
             <p className="text-xs text-muted-foreground">Products in stock</p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
@@ -116,7 +171,7 @@ function AdminDashboard() {
             <CardDescription>You made 265 sales this month.</CardDescription>
           </CardHeader>
           <CardContent>
-            <RecentSale />
+            <RecentSale recentOrders={recentOrders} />
           </CardContent>
         </Card>
       </div>

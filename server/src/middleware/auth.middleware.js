@@ -1,28 +1,36 @@
 import jwt from "jsonwebtoken";
 import prisma from "../db/db.config.js";
-export const isAuth = async (req, res,next) => {
+
+export const isAuth = async (req, res, next) => {
+  try {
     const token = req.cookies.token;
-    
-  if (!token)
-    return res.status(401).json({
-      success: false,
-      message: "login first",
-    });
-try{
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  
-    req.user=await prisma.users.findUnique({
-      where:{
-      id:decoded.id
-      }
-    })
-    next();
-}
-catch (error) {
-    console.log(error)
-      res.status(401).json({
+    if (!token) {
+      return res.status(401).json({
         success: false,
-        message: "some error occured",
+        message: "Login first",
       });
     }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await prisma.users.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Auth error:", error);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 };
